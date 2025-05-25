@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/auth';
 import { Button } from '@/components/ui/button';
-import { UserIcon, ArrowRightOnRectangleIcon, HomeIcon, AcademicCapIcon, UserGroupIcon, BookOpenIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { UserIcon, ArrowRightOnRectangleIcon, HomeIcon, AcademicCapIcon, UserGroupIcon, BookOpenIcon, CalendarIcon, BugAntIcon } from '@heroicons/react/24/outline';
+import { canAccessRoute, getPrimaryRole } from '@/lib/auth/role-permissions';
+import { UserRoleBadge } from '@/components/auth/role-guard';
 
 export function Header() {
   const router = useRouter();
@@ -43,6 +45,7 @@ export function Header() {
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-1">
+            {/* Dashboard - Always visible */}
             <Link
               href="/dashboard"
               className="nav-item flex items-center space-x-2"
@@ -50,34 +53,61 @@ export function Header() {
               <HomeIcon className="w-4 h-4" />
               <span>Dashboard</span>
             </Link>
-            <Link
-              href="/students"
-              className="nav-item flex items-center space-x-2"
-            >
-              <AcademicCapIcon className="w-4 h-4" />
-              <span>Students</span>
-            </Link>
-            <Link
-              href="/partners"
-              className="nav-item flex items-center space-x-2"
-            >
-              <UserGroupIcon className="w-4 h-4" />
-              <span>Partners</span>
-            </Link>
-            <Link
-              href="/courses"
-              className="nav-item flex items-center space-x-2"
-            >
-              <BookOpenIcon className="w-4 h-4" />
-              <span>Courses</span>
-            </Link>
-            <Link
-              href="/academic-years"
-              className="nav-item flex items-center space-x-2"
-            >
-              <CalendarIcon className="w-4 h-4" />
-              <span>Academic</span>
-            </Link>
+
+            {/* Students - Most roles can access */}
+            {canAccessRoute(user, 'students') && (
+              <Link
+                href="/students"
+                className="nav-item flex items-center space-x-2"
+              >
+                <AcademicCapIcon className="w-4 h-4" />
+                <span>Students</span>
+              </Link>
+            )}
+
+            {/* Courses - Education roles */}
+            {canAccessRoute(user, 'courses') && (
+              <Link
+                href="/courses"
+                className="nav-item flex items-center space-x-2"
+              >
+                <BookOpenIcon className="w-4 h-4" />
+                <span>Courses</span>
+              </Link>
+            )}
+
+            {/* Academic Years - Admin and education users */}
+            {canAccessRoute(user, 'academic-years') && (
+              <Link
+                href="/academic-years"
+                className="nav-item flex items-center space-x-2"
+              >
+                <CalendarIcon className="w-4 h-4" />
+                <span>Academic</span>
+              </Link>
+            )}
+
+            {/* Partners - Admin and some business roles */}
+            {canAccessRoute(user, 'partners') && (
+              <Link
+                href="/partners"
+                className="nav-item flex items-center space-x-2"
+              >
+                <UserGroupIcon className="w-4 h-4" />
+                <span>Partners</span>
+              </Link>
+            )}
+
+            {/* Debug - System Manager only */}
+            {canAccessRoute(user, 'debug') && (
+              <Link
+                href="/debug"
+                className="nav-item flex items-center space-x-2"
+              >
+                <BugAntIcon className="w-4 h-4" />
+                <span>Debug</span>
+              </Link>
+            )}
           </nav>
 
           {/* User menu */}
@@ -88,7 +118,9 @@ export function Header() {
               </div>
               <div className="text-sm">
                 <p className="font-semibold text-slate-900">{user?.full_name || user?.user || 'Administrator'}</p>
-                <p className="text-slate-600">System Admin</p>
+                <div className="flex items-center space-x-2">
+                  <UserRoleBadge user={user} />
+                </div>
               </div>
             </div>
             <button

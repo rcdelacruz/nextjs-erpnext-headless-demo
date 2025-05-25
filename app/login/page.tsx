@@ -9,8 +9,10 @@ import {
   AcademicCapIcon,
   ExclamationCircleIcon,
   EyeIcon,
-  EyeSlashIcon
+  EyeSlashIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
+import { DEMO_USERS } from '@/lib/auth/role-permissions';
 
 interface LoginFormData {
   username: string;
@@ -64,6 +66,27 @@ export default function LoginPage() {
     }));
     // Clear error when user starts typing
     if (error) setError('');
+  };
+
+  const handleQuickLogin = async (username: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+    setFormData({ username, password });
+
+    try {
+      const success = await login(username, password);
+      if (success) {
+        console.log('✅ Quick login successful, redirecting to dashboard...');
+        router.push('/dashboard');
+      } else {
+        setError('Quick login failed. Please check your ERPNext configuration.');
+      }
+    } catch (err: any) {
+      console.error('❌ Quick login error:', err);
+      setError(getErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isAuthenticated) {
@@ -171,16 +194,38 @@ export default function LoginPage() {
             </div>
           </form>
 
-          {/* Demo Credentials */}
+          {/* Demo Users Quick Login */}
           <div className="mt-6 p-4 bg-blue-50 rounded-md border border-blue-200">
-            <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials</h3>
-            <div className="text-xs text-blue-700 space-y-1">
-              <p><strong>Username:</strong> Administrator</p>
-              <p><strong>Password:</strong> admin</p>
-              <p className="text-blue-600 mt-2">
-                Note: Make sure your ERPNext instance is running and configured properly.
-              </p>
+            <h3 className="text-sm font-medium text-blue-800 mb-3">Demo Users - Quick Login</h3>
+            <div className="grid gap-2 max-h-64 overflow-y-auto">
+              {DEMO_USERS.map((demoUser) => (
+                <button
+                  key={demoUser.username}
+                  onClick={() => handleQuickLogin(demoUser.username, demoUser.password)}
+                  disabled={isLoading}
+                  className="flex items-center justify-between p-2 text-left text-xs bg-white rounded border border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="flex items-center space-x-2">
+                    <UserIcon className="w-3 h-3 text-blue-600" />
+                    <span className="font-medium text-blue-900">{demoUser.username}</span>
+                  </div>
+                  <span className="text-blue-600 text-xs">{demoUser.description}</span>
+                </button>
+              ))}
             </div>
+            <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-700">
+              <p className="font-medium mb-1">All Demo Users Available:</p>
+              <p><strong>admin</strong> - Full system access</p>
+              <p><strong>academic.admin</strong> - Academic administration</p>
+              <p><strong>registrar</strong> - Student enrollment & records</p>
+              <p><strong>prof.smith</strong> - Faculty member access</p>
+              <p><strong>student.doe</strong> - Student self-service</p>
+              <p><strong>data.clerk</strong> - Data entry operations</p>
+              <p><strong>reports.viewer</strong> - Reports and analytics</p>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              Click any demo user to login instantly. Make sure your ERPNext instance is running.
+            </p>
           </div>
         </div>
 

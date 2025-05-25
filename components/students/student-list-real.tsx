@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, UserIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
+import { PermissionGuard } from '@/components/auth/role-guard';
 
 interface Student {
   name: string;
@@ -96,15 +97,17 @@ export function StudentListReal({ onAddStudent }: StudentListProps) {
             {students.length} student{students.length !== 1 ? 's' : ''} enrolled
           </p>
         </div>
-        {onAddStudent && (
-          <button
-            onClick={onAddStudent}
-            className="btn-primary flex items-center"
-          >
-            <PlusIcon className="w-5 h-5 mr-2" />
-            Add New Student
-          </button>
-        )}
+        <PermissionGuard doctype="Student" action="create">
+          {onAddStudent && (
+            <button
+              onClick={onAddStudent}
+              className="btn-primary flex items-center"
+            >
+              <PlusIcon className="w-5 h-5 mr-2" />
+              Add New Student
+            </button>
+          )}
+        </PermissionGuard>
       </div>
 
       {/* Students Grid */}
@@ -116,15 +119,17 @@ export function StudentListReal({ onAddStudent }: StudentListProps) {
             <p className="text-gray-600 mb-4">
               Get started by adding your first student to the system.
             </p>
-            {onAddStudent && (
-              <button
-                onClick={onAddStudent}
-                className="btn-primary flex items-center"
-              >
-                <PlusIcon className="w-5 h-5 mr-2" />
-                Add Your First Student
-              </button>
-            )}
+            <PermissionGuard doctype="Student" action="create">
+              {onAddStudent && (
+                <button
+                  onClick={onAddStudent}
+                  className="btn-primary flex items-center"
+                >
+                  <PlusIcon className="w-5 h-5 mr-2" />
+                  Add Your First Student
+                </button>
+              )}
+            </PermissionGuard>
           </CardContent>
         </Card>
       ) : (
